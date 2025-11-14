@@ -2,8 +2,9 @@ import { Header } from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { getSellerById, products } from '@/lib/data';
-import { PlusCircle, DollarSign, Tag, List, Edit, Trash2 } from 'lucide-react';
+import { PlusCircle, List, Tag, Edit, Trash2 } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export default function SellerDashboard() {
   const sellerId = 'seller-1'; // Mock seller
@@ -21,9 +22,11 @@ export default function SellerDashboard() {
             </h1>
             <p className="text-muted-foreground">Manage your products and view your sales.</p>
           </div>
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add New Product
+          <Button asChild>
+            <Link href="/seller/add-product">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add New Product
+            </Link>
           </Button>
         </div>
         
@@ -72,9 +75,11 @@ export default function SellerDashboard() {
             ) : (
                 <div className="text-center py-12">
                     <p className="text-muted-foreground mb-4">Ready to sell? Add your first product to get started.</p>
-                    <Button>
+                    <Button asChild>
+                      <Link href="/seller/add-product">
                         <PlusCircle className="mr-2 h-4 w-4" />
                         List a Product
+                      </Link>
                     </Button>
                 </div>
             )}
