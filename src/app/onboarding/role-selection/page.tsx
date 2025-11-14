@@ -28,7 +28,7 @@ export default function RoleSelectionPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/" className="group">
+        <Link href="/seller" className="group">
           <Card className="h-full transform transition-transform duration-300 group-hover:scale-105 group-hover:border-primary">
             <CardHeader>
                 <div className="flex justify-center mb-4">

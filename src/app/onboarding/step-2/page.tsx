@@ -1,26 +1,17 @@
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import Image from 'next/image';
 import Link from 'next/link';
 
 export default function OnboardingStep2() {
   return (
-    <div className="flex flex-col items-center text-center p-8">
-        <Image 
-            src="https://picsum.photos/seed/onboarding2/400/300" 
-            alt="Bargaining illustration"
-            width={400}
-            height={300}
-            className="rounded-lg mb-8 shadow-lg"
-            data-ai-hint="deal handshake"
-        />
+    <div className="flex flex-col items-center text-center p-8 max-w-md mx-auto h-full justify-center">
         <h2 className="text-3xl font-bold font-headline text-white mb-4">
             Find and Bargain
         </h2>
-        <p className="text-lg text-muted-foreground mb-12 max-w-md">
+        <p className="text-lg text-muted-foreground mb-12">
             Discover amazing products and make offers. You set the price you're willing to pay.
         </p>
-        <div className="flex w-full justify-between items-center">
+        <div className="flex w-full justify-between items-center mt-auto">
             <Button variant="outline" size="icon" asChild>
                 <Link href="/onboarding/step-1"><ArrowLeft /></Link>
             </Button>
