@@ -1,3 +1,52 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "product-image-1",
+      "description": "A modern, sleek digital watch on a stand.",
+      "imageUrl": "https://images.unsplash.com/photo-1650811518721-c7adbfe08035?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxkaWdpdGFsJTIwd2F0Y2h8ZW58MHx8fHwxNzYzMTA1NTQ4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "digital watch"
+    },
+    {
+      "id": "product-image-2",
+      "description": "A second view of the modern, sleek digital watch.",
+      "imageUrl": "https://images.unsplash.com/photo-1620832327105-59d6a2720853?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx3YXRjaCUyMHNpZGV8ZW58MHx8fHwxNzYzMTA1NTQ4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "watch side"
+    },
+    {
+      "id": "product-image-3",
+      "description": "High-quality wireless headphones.",
+      "imageUrl": "https://images.unsplash.com/photo-1491927570842-0261e477d937?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHx3aXJlbGVzcyUyMGhlYWRwaG9uZXN8ZW58MHx8fHwxNzYzMDY2MzkxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wireless headphones"
+    },
+    {
+      "id": "product-image-4",
+      "description": "A professional drone in flight.",
+      "imageUrl": "https://images.unsplash.com/photo-1488263590619-bc1fff43b6c1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxkcm9uZXxlbnwwfHx8fDE3NjI5OTY4MjR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "drone"
+    },
+    {
+      "id": "product-image-5",
+      "description": "A vintage film camera.",
+      "imageUrl": "https://images.unsplash.com/photo-1512390225428-a9d51c817f94?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx2aW50YWdlJTIwY2FtZXJhfGVufDB8fHx8MTc2MzA2NjU0OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "vintage camera"
+    },
+    {
+      "id": "seller-avatar-1",
+      "description": "Avatar for seller Alice.",
+      "imageUrl": "https://images.unsplash.com/photo-1580489944761-15a19d654956?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx3b21hbiUyMHBvcnRyYWl0fGVufDB8fHx8MTc2MzEwMjI2Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman portrait"
+    },
+    {
+      "id": "seller-avatar-2",
+      "description": "Avatar for seller Bob.",
+      "imageUrl": "https://images.unsplash.com/photo-1607031542107-f6f46b5d54e9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxtYW4lMjBwb3J0cmFpdHxlbnwwfHx8fDE3NjMwNjYyMjV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man portrait"
+    },
+    {
+      "id": "seller-avatar-3",
+      "description": "Avatar for seller Charlie.",
+      "imageUrl": "https://images.unsplash.com/photo-1522529599102-193c0d76b5b6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxwZXJzb24lMjBzbWlsaW5nfGVufDB8fHx8MTc2MzAzMjg1OXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person smiling"
+    }
+  ]
 }
