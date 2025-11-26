@@ -11,7 +11,7 @@ export default function OnboardingLayout({
             <div className="container mx-auto flex items-center gap-2">
                 <CeloBargainLogo className="h-8 w-8 text-accent" />
                 <span className="text-xl font-bold font-headline text-white">
-                CeloBargain
+                Barcel
                 </span>
             </div>
         </header>

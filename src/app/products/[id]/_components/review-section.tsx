@@ -7,6 +7,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import type { Product } from '@/lib/types';
+import { addReview, getProductById } from '@/lib/store';
+import { useWallet } from '@/hooks/use-wallet';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Sparkles, Star } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -52,7 +54,9 @@ function StarRating({
 export function ReviewSection({ product }: ReviewSectionProps) {
   const [summary, setSummary] = useState('');
   const [isLoadingSummary, setIsLoadingSummary] = useState(false);
+  const [reviews, setReviews] = useState(product.reviews || []);
   const { toast } = useToast();
+  const { wallet } = useWallet();
   const formRef = useRef<HTMLFormElement>(null);
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -63,29 +67,83 @@ export function ReviewSection({ product }: ReviewSectionProps) {
     },
   });
 
+  // Refresh reviews when product changes
+  useEffect(() => {
+    const updatedProduct = getProductById(product.id);
+    if (updatedProduct) {
+      setReviews(updatedProduct.reviews || []);
+    }
+  }, [product.id]);
+
   const generateSummary = async () => {
     setIsLoadingSummary(true);
-    const reviewComments = product.reviews.map((r) => r.comment);
+    const reviewComments = reviews.map((r) => r.comment);
     const result = await handleSummarizeReviews(reviewComments);
     setSummary(result.summary);
     setIsLoadingSummary(false);
   };
   
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    const formData = new FormData();
-    formData.append('rating', String(data.rating));
-    formData.append('comment', data.comment);
+    if (!wallet?.address) {
+      toast({
+        title: 'Wallet Not Connected',
+        description: 'Please connect your wallet to submit a review.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
-    // We don't need prevState, but server actions with useFormState expect it.
-    const result = await handleNewReview(null, formData);
-    
-    toast({
-        title: result.message,
-        variant: result.message.includes('successfully') ? 'default' : 'destructive',
-    });
+    try {
+      // First, validate with server action (for content moderation)
+      const formData = new FormData();
+      formData.append('rating', String(data.rating));
+      formData.append('comment', data.comment);
 
-    if (result.message.includes('successfully')) {
+      const result = await handleNewReview(null, formData);
+      
+      if (!result.message.includes('successfully')) {
+        toast({
+          title: result.message,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      // If validation passes, save to store
+      const newReview = addReview(product.id, {
+        productId: product.id,
+        author: wallet.address.slice(0, 6) + '...' + wallet.address.slice(-4), // Use wallet address as author
+        rating: data.rating,
+        comment: data.comment,
+      });
+
+      if (newReview) {
+        // Refresh the product to get updated reviews
+        const updatedProduct = getProductById(product.id);
+        if (updatedProduct) {
+          setReviews(updatedProduct.reviews || []);
+        }
+
+        toast({
+          title: 'Review Submitted!',
+          description: 'Your review has been saved and will be visible to the seller.',
+        });
+
         form.reset();
+      } else {
+        toast({
+          title: 'Error',
+          description: 'Failed to save review. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      toast({
+        title: 'Error',
+        description: 'An error occurred while submitting your review.',
+        variant: 'destructive',
+      });
     }
   }
 
@@ -133,17 +191,35 @@ export function ReviewSection({ product }: ReviewSectionProps) {
       
       {/* Review List */}
       <div className="space-y-6">
-        {product.reviews.map((review) => (
-          <Card key={review.id} className="bg-card/50">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                 <p className="font-semibold">{review.author}</p>
-                 <StarRating rating={review.rating} />
-              </div>
-              <p className="text-muted-foreground">{review.comment}</p>
+        {reviews.length === 0 ? (
+          <Card className="bg-card/50">
+            <CardContent className="p-8 text-center">
+              <p className="text-muted-foreground">No reviews yet. Be the first to review this product!</p>
             </CardContent>
           </Card>
-        ))}
+        ) : (
+          reviews.map((review) => (
+            <Card key={review.id} className="bg-card/50 border-primary/10 hover:border-primary/20 transition-all duration-300">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                      <span className="text-sm font-bold text-primary">{review.author.charAt(0).toUpperCase()}</span>
+                    </div>
+                    <div>
+                      <p className="font-semibold">{review.author}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <StarRating rating={review.rating} />
+                </div>
+                <p className="text-muted-foreground leading-relaxed">{review.comment}</p>
+              </CardContent>
+            </Card>
+          ))
+        )}
       </div>
 
        {/* Add Review Form */}
@@ -153,7 +229,7 @@ export function ReviewSection({ product }: ReviewSectionProps) {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form ref={formRef} action={(formData) => onSubmit(form.getValues())} className="space-y-6">
+            <form ref={formRef} onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
                 name="rating"

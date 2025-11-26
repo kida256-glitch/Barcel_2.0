@@ -6,13 +6,20 @@ import { z } from 'zod';
 
 export async function handleSummarizeReviews(reviews: string[]) {
   try {
+    if (!process.env.GOOGLE_GENAI_API_KEY) {
+      return {
+        success: false,
+        summary: 'AI features require GOOGLE_GENAI_API_KEY environment variable to be set.',
+      };
+    }
     const summary = await summarizeSellerReviews({ reviews });
     return { success: true, summary: summary.summary };
   } catch (error) {
     console.error('Error summarizing reviews:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return {
       success: false,
-      summary: 'Could not generate summary at this time.',
+      summary: `Could not generate summary: ${errorMessage}. Please check your API key configuration.`,
     };
   }
 }
@@ -37,6 +44,11 @@ export async function handleNewReview(prevState: any, formData: FormData) {
   const { comment } = validatedFields.data;
 
   try {
+    if (!process.env.GOOGLE_GENAI_API_KEY) {
+      // Skip moderation if API key is not set
+      console.warn('GOOGLE_GENAI_API_KEY not set, skipping content moderation');
+      return { message: 'Review submitted successfully! Thank you.', reset: true };
+    }
     const moderation = await flagInappropriateComment({ comment });
     if (moderation.is_inappropriate) {
       return {
@@ -47,6 +59,11 @@ export async function handleNewReview(prevState: any, formData: FormData) {
     return { message: 'Review submitted successfully! Thank you.', reset: true };
   } catch (error) {
     console.error('Error handling new review:', error);
-    return { message: 'An error occurred while submitting your review.' };
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    // If it's an API key error, allow the review to go through
+    if (errorMessage.includes('API') || errorMessage.includes('key')) {
+      return { message: 'Review submitted successfully! Thank you.', reset: true };
+    }
+    return { message: 'An error occurred while submitting your review. Please try again.' };
   }
 }
