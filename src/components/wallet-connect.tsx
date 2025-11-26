@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from './ui/button';
-import { Wallet, LogOut, ChevronDown, Download } from 'lucide-react';
+import { Wallet, LogOut, ChevronDown, Download, Smartphone, Monitor, CheckCircle2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,13 +19,16 @@ import {
   DialogTrigger,
 } from './ui/dialog';
 import { Avatar, AvatarFallback } from './ui/avatar';
+import { Badge } from './ui/badge';
 import { useWallet } from '@/hooks/use-wallet';
 import { formatWalletAddress, detectWallets, type DetectedWallet } from '@/lib/wallet';
 import { useState, useEffect } from 'react';
+import { formatDistanceToNow } from 'date-fns';
 
 export function WalletConnect() {
-  const { wallet, isConnected, isConnecting, connect, disconnect } = useWallet();
+  const { wallet, isConnected, isConnecting, connect, disconnect, walletConnection } = useWallet();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDevicesDialogOpen, setIsDevicesDialogOpen] = useState(false);
   const [detectedWallets, setDetectedWallets] = useState<DetectedWallet[]>([]);
 
   useEffect(() => {
@@ -47,48 +50,128 @@ export function WalletConnect() {
   };
 
   if (isConnected && wallet) {
+    const deviceCount = walletConnection?.devices?.length || 0;
+    const activeDeviceCount = walletConnection?.devices?.filter(d => d.isActive).length || 0;
+
     return (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="secondary" className="flex items-center gap-2">
-            <Avatar className="h-6 w-6">
-              <AvatarFallback className="bg-accent text-accent-foreground text-xs">
-                {wallet.address && wallet.address.length > 2 
-                  ? wallet.address.slice(2, 4).toUpperCase() 
-                  : 'W'}
-              </AvatarFallback>
-            </Avatar>
-            <span className="hidden md:inline">
-              {wallet.address ? formatWalletAddress(wallet.address) : 'Connected'}
-            </span>
-            <ChevronDown className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium">Connected Wallet</p>
-              <p className="text-xs text-muted-foreground font-mono">
-                {wallet.address ? formatWalletAddress(wallet.address) : 'Unknown'}
-              </p>
+      <>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="secondary" className="flex items-center gap-2">
+              <Avatar className="h-6 w-6">
+                <AvatarFallback className="bg-accent text-accent-foreground text-xs">
+                  {wallet.address && wallet.address.length > 2 
+                    ? wallet.address.slice(2, 4).toUpperCase() 
+                    : 'W'}
+                </AvatarFallback>
+              </Avatar>
+              <span className="hidden md:inline">
+                {wallet.address ? formatWalletAddress(wallet.address) : 'Connected'}
+              </span>
+              {deviceCount > 1 && (
+                <Badge variant="secondary" className="text-xs px-1.5 py-0">
+                  {activeDeviceCount}
+                </Badge>
+              )}
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-64">
+            <DropdownMenuLabel>
+              <div className="flex flex-col space-y-1">
+                <p className="text-sm font-medium">Connected Wallet</p>
+                <p className="text-xs text-muted-foreground font-mono">
+                  {wallet.address ? formatWalletAddress(wallet.address) : 'Unknown'}
+                </p>
+                {deviceCount > 1 && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Connected on {activeDeviceCount} device{activeDeviceCount !== 1 ? 's' : ''}
+                  </p>
+                )}
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {deviceCount > 1 && (
+              <DropdownMenuItem onClick={() => setIsDevicesDialogOpen(true)}>
+                <Smartphone className="mr-2 h-4 w-4" />
+                <span>View Connected Devices</span>
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem 
+              onClick={() => {
+                try {
+                  disconnect();
+                } catch (error) {
+                  console.error('Disconnect error:', error);
+                }
+              }} 
+              className="text-destructive"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Disconnect</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Devices Dialog */}
+        <Dialog open={isDevicesDialogOpen} onOpenChange={setIsDevicesDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Connected Devices</DialogTitle>
+              <DialogDescription>
+                Devices where this wallet is connected
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-3 max-h-[60vh] overflow-y-auto">
+              {walletConnection?.devices?.map((device, index) => (
+                <div
+                  key={device.deviceId}
+                  className="flex items-start gap-3 p-3 rounded-lg border bg-card"
+                >
+                  <div className="mt-1">
+                    {device.deviceName.toLowerCase().includes('mobile') || 
+                     device.deviceName.toLowerCase().includes('iphone') ||
+                     device.deviceName.toLowerCase().includes('android') ||
+                     device.deviceName.toLowerCase().includes('ipad') ? (
+                      <Smartphone className="h-5 w-5 text-muted-foreground" />
+                    ) : (
+                      <Monitor className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium">{device.deviceName}</p>
+                      {device.isCurrentDevice && (
+                        <Badge variant="default" className="text-xs">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          This Device
+                        </Badge>
+                      )}
+                      {!device.isActive && (
+                        <Badge variant="secondary" className="text-xs">
+                          Inactive
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Connected {formatDistanceToNow(device.connectedAt, { addSuffix: true })}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Last seen {formatDistanceToNow(device.lastSeenAt, { addSuffix: true })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              {(!walletConnection || walletConnection.devices.length === 0) && (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Smartphone className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-sm">No device information available</p>
+                </div>
+              )}
             </div>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem 
-            onClick={() => {
-              try {
-                disconnect();
-              } catch (error) {
-                console.error('Disconnect error:', error);
-              }
-            }} 
-            className="text-destructive"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Disconnect</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 

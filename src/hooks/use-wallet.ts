@@ -11,16 +11,28 @@ import {
   storeWallet,
   type WalletInfo,
 } from '@/lib/wallet';
+import {
+  syncWalletToFirebase,
+  removeWalletFromFirebase,
+  getWalletDevices,
+  subscribeToWalletDevices,
+  type WalletConnection,
+} from '@/lib/wallet-sync';
 
 export function useWallet() {
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [walletConnection, setWalletConnection] = useState<WalletConnection | null>(null);
   const { toast } = useToast();
 
   const handleDisconnect = async () => {
     try {
+      if (wallet) {
+        await removeWalletFromFirebase(wallet.address);
+      }
       await disconnectWallet();
       setWallet(null);
+      setWalletConnection(null);
       toast({
         title: 'Wallet Disconnected',
         description: 'Your wallet has been disconnected',
@@ -40,6 +52,9 @@ export function useWallet() {
       const stored = getStoredWallet();
       if (stored) {
         setWallet(stored);
+        // Sync to Firebase and load device info
+        syncWalletToFirebase(stored).catch(console.error);
+        getWalletDevices(stored.address).then(setWalletConnection).catch(console.error);
       }
     } catch (error) {
       console.error('Error restoring wallet:', error);
@@ -59,6 +74,9 @@ export function useWallet() {
                 if (currentWallet) {
                   const newWallet = { ...currentWallet, address: accounts[0] };
                   storeWallet(newWallet);
+                  // Sync to Firebase
+                  syncWalletToFirebase(newWallet).catch(console.error);
+                  getWalletDevices(newWallet.address).then(setWalletConnection).catch(console.error);
                   return newWallet;
                 }
                 return currentWallet;
@@ -112,6 +130,22 @@ export function useWallet() {
     }
   }, []);
 
+  // Subscribe to wallet device changes when wallet is connected
+  useEffect(() => {
+    if (!wallet) {
+      setWalletConnection(null);
+      return;
+    }
+
+    const unsubscribe = subscribeToWalletDevices(wallet.address, (connection) => {
+      setWalletConnection(connection);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [wallet?.address]);
+
   const connect = async (walletType: string = 'metamask', provider?: any) => {
     setIsConnecting(true);
     try {
@@ -143,6 +177,10 @@ export function useWallet() {
       if (walletInfo) {
         setWallet(walletInfo);
         storeWallet(walletInfo);
+        // Sync to Firebase for cross-device tracking
+        await syncWalletToFirebase(walletInfo);
+        const connection = await getWalletDevices(walletInfo.address);
+        setWalletConnection(connection);
         toast({
           title: 'Wallet Connected',
           description: `Successfully connected to ${walletInfo.walletType}`,
@@ -165,6 +203,7 @@ export function useWallet() {
     isConnecting,
     connect,
     disconnect: handleDisconnect,
+    walletConnection, // Information about devices connected to this wallet
   };
 }
 
