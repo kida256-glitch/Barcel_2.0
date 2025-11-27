@@ -2,7 +2,7 @@
 
 import { getAddress } from 'viem';
 
-export type WalletType = 'metamask' | 'walletconnect' | 'coinbase' | 'trust' | 'brave' | 'other';
+export type WalletType = 'metamask' | 'walletconnect' | 'coinbase' | 'trust' | 'brave' | 'opera' | 'phantom' | 'rabby' | 'frame' | 'other';
 
 export interface WalletInfo {
   address: string;
@@ -29,12 +29,13 @@ export function formatWalletAddress(address: string): string {
 }
 
 /**
- * Detect all available Web3 wallets
+ * Detect all available Web3 wallets (extensions and injected providers)
  */
 export function detectWallets(): DetectedWallet[] {
   if (typeof window === 'undefined') return [];
 
   const wallets: DetectedWallet[] = [];
+  const seenProviders = new Set();
   const ethereum = (window as any).ethereum;
 
   if (!ethereum) {
@@ -45,55 +46,89 @@ export function detectWallets(): DetectedWallet[] {
   const providers = ethereum.providers || [ethereum];
 
   providers.forEach((provider: any, index: number) => {
-    // MetaMask
+    // Skip if we've already seen this provider
+    if (seenProviders.has(provider)) return;
+    seenProviders.add(provider);
+
+    // Check if provider has required methods
+    if (!provider || !provider.request) return;
+
+    let walletId: string | null = null;
+    let walletName: string | null = null;
+    let walletIcon: string | null = null;
+
+    // MetaMask (browser extension)
     if (provider.isMetaMask && !provider.isBraveWallet) {
-      wallets.push({
-        id: 'metamask',
-        name: 'MetaMask',
-        icon: '🦊',
-        provider,
-        isInstalled: true,
-      });
+      walletId = 'metamask';
+      walletName = 'MetaMask';
+      walletIcon = '🦊';
     }
-    // Coinbase Wallet
+    // Coinbase Wallet (extension or mobile)
     else if (provider.isCoinbaseWallet) {
-      wallets.push({
-        id: 'coinbase',
-        name: 'Coinbase Wallet',
-        icon: '🔷',
-        provider,
-        isInstalled: true,
-      });
+      walletId = 'coinbase';
+      walletName = 'Coinbase Wallet';
+      walletIcon = '🔷';
     }
-    // Trust Wallet
-    else if (provider.isTrust) {
-      wallets.push({
-        id: 'trust',
-        name: 'Trust Wallet',
-        icon: '🔒',
-        provider,
-        isInstalled: true,
-      });
+    // Trust Wallet (browser extension)
+    else if (provider.isTrust || provider.isTrustWallet) {
+      walletId = 'trust';
+      walletName = 'Trust Wallet';
+      walletIcon = '🔒';
     }
-    // Brave Wallet
+    // Brave Wallet (browser extension)
     else if (provider.isBraveWallet) {
-      wallets.push({
-        id: 'brave',
-        name: 'Brave Wallet',
-        icon: '🦁',
-        provider,
-        isInstalled: true,
-      });
+      walletId = 'brave';
+      walletName = 'Brave Wallet';
+      walletIcon = '🦁';
+    }
+    // Opera Wallet
+    else if (provider.isOpera) {
+      walletId = 'opera';
+      walletName = 'Opera Wallet';
+      walletIcon = '🎭';
+    }
+    // Phantom Wallet
+    else if (provider.isPhantom) {
+      walletId = 'phantom';
+      walletName = 'Phantom';
+      walletIcon = '👻';
+    }
+    // Rabby Wallet
+    else if (provider.isRabby) {
+      walletId = 'rabby';
+      walletName = 'Rabby Wallet';
+      walletIcon = '🐰';
+    }
+    // Frame Wallet
+    else if (provider.isFrame) {
+      walletId = 'frame';
+      walletName = 'Frame';
+      walletIcon = '🖼️';
     }
     // Generic EIP-1193 provider (catch-all for other wallets)
-    else if (provider.request && index === 0) {
-      // Only add generic provider once
-      const existingGeneric = wallets.find(w => w.id === 'other');
-      if (!existingGeneric) {
+    else if (index === 0 || !wallets.find(w => w.id === 'other')) {
+      // Try to identify by provider properties
+      const providerString = JSON.stringify(provider);
+      
+      if (providerString.includes('MetaMask') || providerString.includes('metamask')) {
+        walletId = 'metamask';
+        walletName = 'MetaMask';
+        walletIcon = '🦊';
+      } else {
+        walletId = 'other';
+        walletName = 'Web3 Wallet';
+        walletIcon = '💼';
+      }
+    }
+
+    if (walletId && walletName && walletIcon) {
+      // Check if we already added this wallet type
+      const existing = wallets.find(w => w.id === walletId);
+      if (!existing) {
         wallets.push({
-          id: 'other',
-          name: 'Web3 Wallet',
-          icon: '💼',
+          id: walletId,
+          name: walletName,
+          icon: walletIcon,
           provider,
           isInstalled: true,
         });
@@ -101,7 +136,11 @@ export function detectWallets(): DetectedWallet[] {
     }
   });
 
-  return wallets;
+  // Sort wallets: known wallets first, then generic
+  const knownWallets = wallets.filter(w => w.id !== 'other');
+  const otherWallets = wallets.filter(w => w.id === 'other');
+  
+  return [...knownWallets, ...otherWallets];
 }
 
 /**
@@ -115,10 +154,21 @@ export async function connectGenericWallet(provider: any): Promise<WalletInfo | 
   }
 
   try {
+    // Log wallet connection attempt for tracking
+    console.log('[Wallet] Attempting to connect to wallet provider', {
+      hasRequest: !!provider.request,
+      isMetaMask: provider.isMetaMask,
+      isCoinbaseWallet: provider.isCoinbaseWallet,
+      isTrust: provider.isTrust || provider.isTrustWallet,
+      isBrave: provider.isBraveWallet,
+    });
+
     // Request account access
     const accounts = await provider.request({
       method: 'eth_requestAccounts',
     });
+    
+    console.log('[Wallet] Accounts received:', accounts?.length || 0);
 
     if (!accounts || accounts.length === 0) {
       throw new Error('No accounts found');
@@ -170,25 +220,62 @@ export async function connectGenericWallet(provider: any): Promise<WalletInfo | 
       }
     }
 
-    // Determine wallet type
+    // Determine wallet type with enhanced detection
     let walletType: WalletType = 'other';
     if (provider.isMetaMask && !provider.isBraveWallet) {
       walletType = 'metamask';
     } else if (provider.isCoinbaseWallet) {
       walletType = 'coinbase';
-    } else if (provider.isTrust) {
+    } else if (provider.isTrust || provider.isTrustWallet) {
       walletType = 'trust';
     } else if (provider.isBraveWallet) {
       walletType = 'brave';
+    } else if (provider.isOpera) {
+      walletType = 'opera';
+    } else if (provider.isPhantom) {
+      walletType = 'phantom';
+    } else if (provider.isRabby) {
+      walletType = 'rabby';
+    } else if (provider.isFrame) {
+      walletType = 'frame';
+    } else {
+      // Try to identify by checking provider properties
+      const providerString = JSON.stringify(provider);
+      if (providerString.includes('MetaMask') || providerString.includes('metamask')) {
+        walletType = 'metamask';
+      } else if (providerString.includes('Coinbase') || providerString.includes('coinbase')) {
+        walletType = 'coinbase';
+      } else if (providerString.includes('Trust') || providerString.includes('trust')) {
+        walletType = 'trust';
+      }
     }
 
-    return {
+    const walletInfo = {
       address,
       chainId: chainIdNumber,
       walletType,
     };
+    
+    console.log('[Wallet] Successfully connected:', {
+      address: formatWalletAddress(address),
+      chainId: chainIdNumber,
+      walletType,
+    });
+    
+    return walletInfo;
   } catch (error: any) {
-    throw new Error(error.message || 'Failed to connect to wallet');
+    console.error('[Wallet] Connection error:', error);
+    
+    // Provide more specific error messages
+    if (error.code === 4001) {
+      throw new Error('Connection rejected. Please approve the connection request in your wallet.');
+    } else if (error.code === -32002) {
+      throw new Error('Connection request already pending. Please check your wallet.');
+    } else if (error.message) {
+      throw new Error(error.message);
+    } else {
+      throw new Error('Failed to connect to wallet. Please make sure your wallet is unlocked and try again.');
+    }
   }
 }
 
@@ -265,6 +352,58 @@ export function storeWallet(wallet: WalletInfo): void {
   if (typeof window === 'undefined') return;
   localStorage.setItem('wallet_address', wallet.address);
   localStorage.setItem('wallet_type', wallet.walletType);
+  
+  // Also store connection timestamp for tracking
+  localStorage.setItem('wallet_connected_at', new Date().toISOString());
+}
+
+/**
+ * Get all detected wallet providers (for debugging/tracking)
+ */
+export function getAllWalletProviders(): Array<{ name: string; isInstalled: boolean; properties: string[] }> {
+  if (typeof window === 'undefined') return [];
+  
+  const providers: Array<{ name: string; isInstalled: boolean; properties: string[] }> = [];
+  const ethereum = (window as any).ethereum;
+  
+  if (!ethereum) {
+    return providers;
+  }
+  
+  const providerList = ethereum.providers || [ethereum];
+  
+  providerList.forEach((provider: any, index: number) => {
+    if (!provider) return;
+    
+    const properties: string[] = [];
+    if (provider.isMetaMask) properties.push('isMetaMask');
+    if (provider.isCoinbaseWallet) properties.push('isCoinbaseWallet');
+    if (provider.isTrust || provider.isTrustWallet) properties.push('isTrust');
+    if (provider.isBraveWallet) properties.push('isBraveWallet');
+    if (provider.isOpera) properties.push('isOpera');
+    if (provider.isPhantom) properties.push('isPhantom');
+    if (provider.isRabby) properties.push('isRabby');
+    if (provider.isFrame) properties.push('isFrame');
+    if (provider.request) properties.push('hasRequest');
+    
+    providers.push({
+      name: `Provider ${index + 1}`,
+      isInstalled: !!provider.request,
+      properties,
+    });
+  });
+  
+  return providers;
+}
+
+/**
+ * Check if a specific wallet type is available
+ */
+export function isWalletAvailable(walletType: WalletType): boolean {
+  if (typeof window === 'undefined') return false;
+  
+  const wallets = detectWallets();
+  return wallets.some(w => w.id === walletType);
 }
 
 // Extend Window interface for TypeScript
@@ -275,7 +414,12 @@ declare global {
       isMetaMask?: boolean;
       isCoinbaseWallet?: boolean;
       isTrust?: boolean;
+      isTrustWallet?: boolean;
       isBraveWallet?: boolean;
+      isOpera?: boolean;
+      isPhantom?: boolean;
+      isRabby?: boolean;
+      isFrame?: boolean;
       providers?: any[];
       on?: (event: string, handler: (...args: any[]) => void) => void;
       removeListener?: (event: string, handler: (...args: any[]) => void) => void;

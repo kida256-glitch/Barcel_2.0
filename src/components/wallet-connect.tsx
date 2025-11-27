@@ -34,8 +34,37 @@ export function WalletConnect() {
   useEffect(() => {
     // Detect wallets when dialog opens
     if (isDialogOpen) {
-      const wallets = detectWallets();
-      setDetectedWallets(wallets);
+      const updateWallets = () => {
+        const wallets = detectWallets();
+        setDetectedWallets(wallets);
+      };
+      
+      // Initial detection
+      updateWallets();
+      
+      // Listen for ethereum provider changes (when new extensions are installed)
+      const handleEthereumChange = () => {
+        updateWallets();
+      };
+      
+      // Check for ethereum provider periodically
+      const interval = setInterval(() => {
+        if ((window as any).ethereum) {
+          updateWallets();
+        }
+      }, 2000); // Check every 2 seconds
+      
+      // Listen for window focus (user might have installed extension in another tab)
+      window.addEventListener('focus', handleEthereumChange);
+      
+      // Listen for storage events (cross-tab communication)
+      window.addEventListener('storage', handleEthereumChange);
+      
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('focus', handleEthereumChange);
+        window.removeEventListener('storage', handleEthereumChange);
+      };
     }
   }, [isDialogOpen]);
 

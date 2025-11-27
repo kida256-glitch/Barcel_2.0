@@ -51,10 +51,35 @@ export function useWallet() {
     try {
       const stored = getStoredWallet();
       if (stored) {
-        setWallet(stored);
-        // Sync to Firebase and load device info
-        syncWalletToFirebase(stored).catch(console.error);
-        getWalletDevices(stored.address).then(setWalletConnection).catch(console.error);
+        // Verify the wallet is still accessible
+        if (typeof window !== 'undefined' && (window as any).ethereum) {
+          const ethereum = (window as any).ethereum;
+          const providers = ethereum.providers || [ethereum];
+          
+          // Check if the stored wallet type is still available
+          const isAvailable = providers.some((p: any) => {
+            if (stored.walletType === 'metamask') return p.isMetaMask && !p.isBraveWallet;
+            if (stored.walletType === 'coinbase') return p.isCoinbaseWallet;
+            if (stored.walletType === 'trust') return p.isTrust || p.isTrustWallet;
+            if (stored.walletType === 'brave') return p.isBraveWallet;
+            return true; // For 'other' or unknown types, assume available
+          });
+          
+          if (isAvailable) {
+            setWallet(stored);
+            // Sync to Firebase and load device info
+            syncWalletToFirebase(stored).catch(console.error);
+            getWalletDevices(stored.address).then(setWalletConnection).catch(console.error);
+          } else {
+            // Wallet extension was removed, clear stored wallet
+            disconnectWallet().catch(console.error);
+          }
+        } else {
+          setWallet(stored);
+          // Sync to Firebase even if ethereum not available (might be mobile wallet)
+          syncWalletToFirebase(stored).catch(console.error);
+          getWalletDevices(stored.address).then(setWalletConnection).catch(console.error);
+        }
       }
     } catch (error) {
       console.error('Error restoring wallet:', error);
