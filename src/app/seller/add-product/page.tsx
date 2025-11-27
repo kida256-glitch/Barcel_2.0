@@ -1,6 +1,7 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { useForm, useFieldArray, type Control } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,14 +9,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Header } from '@/components/header';
 import { toast } from '@/hooks/use-toast';
-import { PlusCircle, Trash2, ArrowLeft, Upload, X } from 'lucide-react';
+import { PlusCircle, Trash2, ArrowLeft, Upload, X, Sparkles, Package } from 'lucide-react';
 import Link from 'next/link';
 import { addProduct } from '@/lib/store';
 import { useWallet } from '@/hooks/use-wallet';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Badge } from '@/components/ui/badge';
 
 const productSchema = z.object({
   name: z.string().min(3, 'Product name must be at least 3 characters.'),
@@ -28,10 +30,20 @@ const productSchema = z.object({
 
 type ProductFormValues = z.infer<typeof productSchema>;
 
-export default function AddProductPage() {
+function AddProductForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { wallet } = useWallet();
   const [imageFiles, setImageFiles] = useState<{ file: File; preview: string }[]>([]);
+  const [productType, setProductType] = useState<'premium' | 'other'>('other');
+  
+  useEffect(() => {
+    const type = searchParams.get('type');
+    if (type === 'premium' || type === 'other') {
+      setProductType(type);
+    }
+  }, [searchParams]);
+
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
     defaultValues: {
@@ -111,6 +123,7 @@ export default function AddProductPage() {
         sellerId: sellerId,
         priceOptions: data.priceOptions.map(p => p.price).sort((a, b) => b - a), // Sort descending
         reviews: [],
+        productType: productType,
       });
 
       toast({
@@ -132,15 +145,57 @@ export default function AddProductPage() {
     <>
       <Header />
       <main className="container mx-auto px-4 py-8">
-        <div className="flex items-center mb-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center">
             <Button variant="outline" size="icon" className="mr-4" asChild>
-                <Link href="/seller">
-                    <ArrowLeft />
-                </Link>
+              <Link href="/seller">
+                <ArrowLeft />
+              </Link>
             </Button>
-            <h1 className="text-3xl font-bold font-headline text-primary">
-            Add New Product
-            </h1>
+            <div>
+              <h1 className="text-3xl font-bold font-headline text-primary">
+                Add New Product
+              </h1>
+              <div className="flex items-center gap-2 mt-2">
+                {productType === 'premium' ? (
+                  <Badge className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white">
+                    <Sparkles className="h-3 w-3 mr-1" />
+                    Premium Product
+                  </Badge>
+                ) : (
+                  <Badge variant="secondary">
+                    <Package className="h-3 w-3 mr-1" />
+                    Other Product
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant={productType === 'premium' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => {
+                setProductType('premium');
+                router.replace('/seller/add-product?type=premium');
+              }}
+              className={productType === 'premium' ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700' : ''}
+            >
+              <Sparkles className="h-4 w-4 mr-2" />
+              Premium
+            </Button>
+            <Button
+              variant={productType === 'other' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => {
+                setProductType('other');
+                router.replace('/seller/add-product?type=other');
+              }}
+            >
+              <Package className="h-4 w-4 mr-2" />
+              Other
+            </Button>
+          </div>
         </div>
 
         <Card>
@@ -313,5 +368,20 @@ export default function AddProductPage() {
         </Card>
       </main>
     </>
+  );
+}
+
+export default function AddProductPage() {
+  return (
+    <Suspense fallback={
+      <>
+        <Header />
+        <main className="container mx-auto px-4 py-8">
+          <div className="text-center py-12">Loading...</div>
+        </main>
+      </>
+    }>
+      <AddProductForm />
+    </Suspense>
   );
 }

@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { getProductsBySeller, getOffersBySeller, deleteProduct, getSoldProductsBySeller, getProductSalesCount, getNewOffersCount, getSellerOverallRating, getSellerLoyaltyPoints, getSellerLoyaltyTier, getAllReviewsBySeller } from '@/lib/store';
 import { hasCompletedOnboarding } from '@/lib/onboarding';
 import { useWallet } from '@/hooks/use-wallet';
-import { PlusCircle, List, Tag, Edit, Trash2, Bell, ShoppingBag, TrendingUp, Star, Award, MessageSquare } from 'lucide-react';
+import { PlusCircle, List, Tag, Edit, Trash2, Bell, ShoppingBag, TrendingUp, Star, Award, MessageSquare, Store, Sparkles, Package } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -166,17 +166,106 @@ export default function SellerDashboard() {
                 )}
               </Link>
             </Button>
-            <Button 
-              asChild
-              className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-primary/30"
-            >
-              <Link href="/seller/add-product">
-                <PlusCircle className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
-                Add New Product
-              </Link>
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button 
+                asChild
+                className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-yellow-500/30"
+              >
+                <Link href="/seller/add-product?type=premium">
+                  <Sparkles className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
+                  Add Premium Product
+                </Link>
+              </Button>
+              <Button 
+                asChild
+                className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-primary/30"
+              >
+                <Link href="/seller/add-product?type=other">
+                  <Package className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
+                  Add Other Product
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
+
+        {/* Seller Guide Section */}
+        <Card className="mb-8 border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 backdrop-blur-sm animate-slide-in-3d">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/20 animate-pulse-3d">
+                <Store className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  How to Sell on Barcel
+                </CardTitle>
+                <CardDescription>
+                  Follow these steps to start selling your products
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex gap-4">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+                  1
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">Add Your Products</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Click "Add New Product" to list your items. Upload images, set your product name and description, and create price tiers for negotiation.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+                  2
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">Receive Offers</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Buyers will browse your products and make offers. You'll receive notifications when new offers come in. Check the "Offers" section to view and manage all offers.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+                  3
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">Negotiate Prices</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Review offers and counter-offer if needed. You can accept, reject, or propose a different price. The negotiation history is saved for transparency.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+                  4
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">Complete Sales</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Once a buyer confirms payment, complete the purchase to receive funds. Track your sales and build your reputation with buyer reviews.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+                  5
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">Build Your Reputation</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Earn positive reviews from buyers to increase your seller rating and loyalty points. Higher ratings help you attract more customers and unlock premium features.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Seller Stats Section */}
         {(sellerRating.rating > 0 || allReviews.length > 0) && (

@@ -4,8 +4,10 @@
 
 const ONBOARDING_COMPLETED_KEY = 'celobargain_onboarding_completed';
 const USER_ROLE_KEY = 'celobargain_user_role';
+const PRODUCT_TYPE_KEY = 'celobargain_product_type';
 
 export type UserRole = 'buyer' | 'seller';
+export type ProductType = 'premium' | 'other';
 
 /**
  * Check if user has completed onboarding
@@ -67,6 +69,37 @@ export function setUserRole(role: UserRole): void {
 }
 
 /**
+ * Get the user's selected product type (for sellers)
+ */
+export function getProductType(): ProductType | null {
+  if (typeof window === 'undefined') return null;
+  
+  try {
+    const type = localStorage.getItem(PRODUCT_TYPE_KEY);
+    if (type === 'premium' || type === 'other') {
+      return type;
+    }
+    return null;
+  } catch (error) {
+    console.error('Error getting product type:', error);
+    return null;
+  }
+}
+
+/**
+ * Set the user's selected product type (for sellers)
+ */
+export function setProductType(type: ProductType): void {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    localStorage.setItem(PRODUCT_TYPE_KEY, type);
+  } catch (error) {
+    console.error('Error setting product type:', error);
+  }
+}
+
+/**
  * Reset onboarding (for testing or if user wants to see it again)
  */
 export function resetOnboarding(): void {
@@ -75,6 +108,7 @@ export function resetOnboarding(): void {
   try {
     localStorage.removeItem(ONBOARDING_COMPLETED_KEY);
     localStorage.removeItem(USER_ROLE_KEY);
+    localStorage.removeItem(PRODUCT_TYPE_KEY);
   } catch (error) {
     console.error('Error resetting onboarding:', error);
   }

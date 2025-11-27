@@ -6,13 +6,13 @@ import { getAllProducts } from '@/lib/store';
 import { hasCompletedOnboarding } from '@/lib/onboarding';
 import { useWallet } from '@/hooks/use-wallet';
 import { WalletConnect } from '@/components/wallet-connect';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { Product } from '@/lib/types';
 import type { Review } from '@/lib/types';
-import { Wallet } from 'lucide-react';
+import { Wallet, ShoppingCart } from 'lucide-react';
 
 export default function BuyerHomePage() {
   const [products, setProducts] = useState<(Product & { reviews: Review[] })[]>([]);
@@ -84,6 +84,84 @@ export default function BuyerHomePage() {
           </h1>
           <p className="text-muted-foreground text-base sm:text-lg px-4">Find amazing deals and negotiate prices</p>
         </div>
+
+        {/* Buyer Guide Section */}
+        <Card className="mb-8 border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 backdrop-blur-sm animate-slide-in-3d">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/20 animate-pulse-3d">
+                <ShoppingCart className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  How to Buy on Barcel
+                </CardTitle>
+                <CardDescription>
+                  Follow these steps to start shopping and making purchases
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex gap-4">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+                  1
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">Browse Products</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Explore the marketplace to find products you're interested in. Click on any product to view detailed information, images, and seller profile.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+                  2
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">Make an Offer</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Select a price tier or enter your own offer price. Sellers can see your offer and may accept, reject, or counter-offer with a different price.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+                  3
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">Negotiate</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Engage in price negotiations with sellers. You can make counter-offers until both parties agree on a price. All negotiation history is transparent.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+                  4
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">Confirm Payment</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Once you agree on a price, confirm the payment. Your funds will be securely held in escrow until the seller completes the transaction.
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+                  5
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold mb-1">Leave a Review</h3>
+                  <p className="text-sm text-muted-foreground">
+                    After receiving your product, leave a review to help other buyers and help sellers build their reputation. Your feedback matters!
+                  </p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
         {products.length === 0 ? (
           <div className="text-center py-12 sm:py-16 md:py-20 animate-slide-in-3d px-4">
             <div className="inline-block mb-4 sm:mb-6 animate-float">

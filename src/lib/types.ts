@@ -23,4 +23,5 @@ export interface Product {
   images: string[];
   sellerId: string;
   priceOptions: number[];
+  productType?: 'premium' | 'other';
 }
