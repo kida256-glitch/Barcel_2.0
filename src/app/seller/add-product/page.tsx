@@ -145,25 +145,25 @@ function AddProductForm() {
     <>
       <Header />
       <main className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center">
-            <Button variant="outline" size="icon" className="mr-4" asChild>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+          <div className="flex items-center min-w-0 flex-1">
+            <Button variant="outline" size="icon" className="mr-2 sm:mr-4 flex-shrink-0" asChild>
               <Link href="/seller">
                 <ArrowLeft />
               </Link>
             </Button>
-            <div>
-              <h1 className="text-3xl font-bold font-headline text-primary">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-headline text-primary break-words">
                 Add New Product
               </h1>
-              <div className="flex items-center gap-2 mt-2">
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
                 {productType === 'premium' ? (
-                  <Badge className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white">
+                  <Badge className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white text-xs">
                     <Sparkles className="h-3 w-3 mr-1" />
                     Premium Product
                   </Badge>
                 ) : (
-                  <Badge variant="secondary">
+                  <Badge variant="secondary" className="text-xs">
                     <Package className="h-3 w-3 mr-1" />
                     Other Product
                   </Badge>
@@ -171,7 +171,7 @@ function AddProductForm() {
               </div>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-shrink-0">
             <Button
               variant={productType === 'premium' ? 'default' : 'outline'}
               size="sm"
@@ -179,9 +179,9 @@ function AddProductForm() {
                 setProductType('premium');
                 router.replace('/seller/add-product?type=premium');
               }}
-              className={productType === 'premium' ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700' : ''}
+              className={`${productType === 'premium' ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700' : ''} text-xs sm:text-sm whitespace-nowrap`}
             >
-              <Sparkles className="h-4 w-4 mr-2" />
+              <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               Premium
             </Button>
             <Button
@@ -191,8 +191,9 @@ function AddProductForm() {
                 setProductType('other');
                 router.replace('/seller/add-product?type=other');
               }}
+              className="text-xs sm:text-sm whitespace-nowrap"
             >
-              <Package className="h-4 w-4 mr-2" />
+              <Package className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
               Other
             </Button>
           </div>

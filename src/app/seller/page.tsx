@@ -126,63 +126,65 @@ export default function SellerDashboard() {
       <Header />
       <main className="container mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 md:py-8 perspective-1000 max-w-7xl">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 sm:mb-8 gap-4 animate-slide-in-3d">
-          <div className="flex-1 min-w-0">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-headline bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-gradient-animated mb-2">
+          <div className="flex-1 min-w-0 pr-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold font-headline bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-gradient-animated mb-2 break-words">
               Seller Dashboard
             </h1>
-            <p className="text-muted-foreground text-sm sm:text-base md:text-lg">Manage your products and view your sales.</p>
+            <p className="text-muted-foreground text-sm sm:text-base md:text-lg break-words">Manage your products and view your sales.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 w-full md:w-auto">
             {sellerRating.rating > 0 && (
-              <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-yellow-500/10 to-yellow-500/5 border border-yellow-500/20">
-                <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                <div>
-                  <div className="text-lg font-bold text-yellow-400">{sellerRating.rating.toFixed(1)}</div>
-                  <div className="text-xs text-muted-foreground">{sellerRating.totalReviews} reviews</div>
+              <div className="flex items-center gap-2 px-2 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-yellow-500/10 to-yellow-500/5 border border-yellow-500/20 flex-shrink-0">
+                <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400 fill-current flex-shrink-0" />
+                <div className="min-w-0">
+                  <div className="text-sm sm:text-lg font-bold text-yellow-400 truncate">{sellerRating.rating.toFixed(1)}</div>
+                  <div className="text-xs text-muted-foreground truncate">{sellerRating.totalReviews} reviews</div>
                 </div>
               </div>
             )}
             {loyaltyPoints > 0 && (
-              <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500/10 to-purple-500/5 border border-purple-500/20">
-                <Award className="h-5 w-5 text-purple-400" />
-                <div>
-                  <div className="text-lg font-bold text-purple-400">{loyaltyPoints} pts</div>
-                  <div className="text-xs text-muted-foreground">{loyaltyTier.tier}</div>
+              <div className="flex items-center gap-2 px-2 sm:px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500/10 to-purple-500/5 border border-purple-500/20 flex-shrink-0">
+                <Award className="h-4 w-4 sm:h-5 sm:w-5 text-purple-400 flex-shrink-0" />
+                <div className="min-w-0">
+                  <div className="text-sm sm:text-lg font-bold text-purple-400 truncate">{loyaltyPoints} pts</div>
+                  <div className="text-xs text-muted-foreground truncate">{loyaltyTier.tier}</div>
                 </div>
               </div>
             )}
             <Button 
               variant="outline" 
               asChild
-              className="transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20 hover:border-primary/50"
+              className="transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-primary/20 hover:border-primary/50 text-xs sm:text-sm whitespace-nowrap"
             >
               <Link href="/seller/offers">
-                <Bell className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:rotate-12" />
+                <Bell className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-300 group-hover:rotate-12" />
                 Offers
                 {pendingOffersCount > 0 && (
-                  <Badge variant="destructive" className="ml-2 animate-pulse-3d">
+                  <Badge variant="destructive" className="ml-1 sm:ml-2 animate-pulse-3d text-xs">
                     {pendingOffersCount}
                   </Badge>
                 )}
               </Link>
             </Button>
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <Button 
                 asChild
-                className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-yellow-500/30"
+                className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-yellow-500/30 text-xs sm:text-sm whitespace-nowrap"
               >
                 <Link href="/seller/add-product?type=premium">
-                  <Sparkles className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
-                  Add Premium Product
+                  <Sparkles className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-300 group-hover:rotate-90" />
+                  <span className="hidden xs:inline">Add Premium Product</span>
+                  <span className="xs:hidden">Premium</span>
                 </Link>
               </Button>
               <Button 
                 asChild
-                className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-primary/30"
+                className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-primary/30 text-xs sm:text-sm whitespace-nowrap"
               >
                 <Link href="/seller/add-product?type=other">
-                  <Package className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
-                  Add Other Product
+                  <Package className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 transition-transform duration-300 group-hover:rotate-90" />
+                  <span className="hidden xs:inline">Add Other Product</span>
+                  <span className="xs:hidden">Other</span>
                 </Link>
               </Button>
             </div>
@@ -192,15 +194,15 @@ export default function SellerDashboard() {
         {/* Seller Guide Section */}
         <Card className="mb-8 border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 backdrop-blur-sm animate-slide-in-3d">
           <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/20 animate-pulse-3d">
-                <Store className="h-5 w-5 text-primary" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-2 rounded-lg bg-primary/20 animate-pulse-3d flex-shrink-0">
+                <Store className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               </div>
-              <div>
-                <CardTitle className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <div className="min-w-0 flex-1">
+                <CardTitle className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent text-lg sm:text-xl break-words">
                   How to Sell on Barcel
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs sm:text-sm break-words">
                   Follow these steps to start selling your products
                 </CardDescription>
               </div>
@@ -208,57 +210,57 @@ export default function SellerDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+              <div className="flex gap-3 sm:gap-4">
+                <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary text-sm sm:text-base">
                   1
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Add Your Products</h3>
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold mb-1 text-sm sm:text-base break-words">Add Your Products</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground break-words">
                     Click "Add New Product" to list your items. Upload images, set your product name and description, and create price tiers for negotiation.
                   </p>
                 </div>
               </div>
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+              <div className="flex gap-3 sm:gap-4">
+                <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary text-sm sm:text-base">
                   2
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Receive Offers</h3>
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold mb-1 text-sm sm:text-base break-words">Receive Offers</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground break-words">
                     Buyers will browse your products and make offers. You'll receive notifications when new offers come in. Check the "Offers" section to view and manage all offers.
                   </p>
                 </div>
               </div>
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+              <div className="flex gap-3 sm:gap-4">
+                <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary text-sm sm:text-base">
                   3
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Negotiate Prices</h3>
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold mb-1 text-sm sm:text-base break-words">Negotiate Prices</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground break-words">
                     Review offers and counter-offer if needed. You can accept, reject, or propose a different price. The negotiation history is saved for transparency.
                   </p>
                 </div>
               </div>
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+              <div className="flex gap-3 sm:gap-4">
+                <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary text-sm sm:text-base">
                   4
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Complete Sales</h3>
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold mb-1 text-sm sm:text-base break-words">Complete Sales</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground break-words">
                     Once a buyer confirms payment, complete the purchase to receive funds. Track your sales and build your reputation with buyer reviews.
                   </p>
                 </div>
               </div>
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+              <div className="flex gap-3 sm:gap-4">
+                <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary text-sm sm:text-base">
                   5
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Build Your Reputation</h3>
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold mb-1 text-sm sm:text-base break-words">Build Your Reputation</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground break-words">
                     Earn positive reviews from buyers to increase your seller rating and loyalty points. Higher ratings help you attract more customers and unlock premium features.
                   </p>
                 </div>

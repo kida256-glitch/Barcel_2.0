@@ -88,15 +88,15 @@ export default function BuyerHomePage() {
         {/* Buyer Guide Section */}
         <Card className="mb-8 border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 backdrop-blur-sm animate-slide-in-3d">
           <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/20 animate-pulse-3d">
-                <ShoppingCart className="h-5 w-5 text-primary" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="p-2 rounded-lg bg-primary/20 animate-pulse-3d flex-shrink-0">
+                <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               </div>
-              <div>
-                <CardTitle className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <div className="min-w-0 flex-1">
+                <CardTitle className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent text-lg sm:text-xl break-words">
                   How to Buy on Barcel
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs sm:text-sm break-words">
                   Follow these steps to start shopping and making purchases
                 </CardDescription>
               </div>
@@ -104,57 +104,57 @@ export default function BuyerHomePage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+              <div className="flex gap-3 sm:gap-4">
+                <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary text-sm sm:text-base">
                   1
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Browse Products</h3>
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold mb-1 text-sm sm:text-base break-words">Browse Products</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground break-words">
                     Explore the marketplace to find products you're interested in. Click on any product to view detailed information, images, and seller profile.
                   </p>
                 </div>
               </div>
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+              <div className="flex gap-3 sm:gap-4">
+                <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary text-sm sm:text-base">
                   2
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Make an Offer</h3>
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold mb-1 text-sm sm:text-base break-words">Make an Offer</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground break-words">
                     Select a price tier or enter your own offer price. Sellers can see your offer and may accept, reject, or counter-offer with a different price.
                   </p>
                 </div>
               </div>
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+              <div className="flex gap-3 sm:gap-4">
+                <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary text-sm sm:text-base">
                   3
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Negotiate</h3>
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold mb-1 text-sm sm:text-base break-words">Negotiate</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground break-words">
                     Engage in price negotiations with sellers. You can make counter-offers until both parties agree on a price. All negotiation history is transparent.
                   </p>
                 </div>
               </div>
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+              <div className="flex gap-3 sm:gap-4">
+                <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary text-sm sm:text-base">
                   4
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Confirm Payment</h3>
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold mb-1 text-sm sm:text-base break-words">Confirm Payment</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground break-words">
                     Once you agree on a price, confirm the payment. Your funds will be securely held in escrow until the seller completes the transaction.
                   </p>
                 </div>
               </div>
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
+              <div className="flex gap-3 sm:gap-4">
+                <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary text-sm sm:text-base">
                   5
                 </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold mb-1">Leave a Review</h3>
-                  <p className="text-sm text-muted-foreground">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold mb-1 text-sm sm:text-base break-words">Leave a Review</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground break-words">
                     After receiving your product, leave a review to help other buyers and help sellers build their reputation. Your feedback matters!
                   </p>
                 </div>

@@ -67,22 +67,22 @@ export function Header() {
             variant="ghost" 
             size="sm" 
             asChild
-            className="transition-all duration-300 hover:scale-105 hover:bg-primary/10 hover:shadow-lg hover:shadow-primary/20 px-2 sm:px-3"
+            className="transition-all duration-300 hover:scale-105 hover:bg-primary/10 hover:shadow-lg hover:shadow-primary/20 px-1 sm:px-2 md:px-3 text-xs sm:text-sm"
           >
             <Link href={homeUrl}>
-              <Home className="h-4 w-4 sm:mr-2 transition-transform duration-300 group-hover:rotate-12" />
-              <span className="hidden sm:inline">Home</span>
+              <Home className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 transition-transform duration-300 group-hover:rotate-12 flex-shrink-0" />
+              <span className="hidden sm:inline whitespace-nowrap">Home</span>
             </Link>
           </Button>
           <Button 
             variant="ghost" 
             size="sm" 
             asChild
-            className="transition-all duration-300 hover:scale-105 hover:bg-accent/10 hover:shadow-lg hover:shadow-accent/20 px-2 sm:px-3"
+            className="transition-all duration-300 hover:scale-105 hover:bg-accent/10 hover:shadow-lg hover:shadow-accent/20 px-1 sm:px-2 md:px-3 text-xs sm:text-sm"
           >
             <Link href="/onboarding/role-selection">
-              <Users className="h-4 w-4 sm:mr-2 transition-transform duration-300 group-hover:rotate-12" />
-              <span className="hidden sm:inline">Switch Role</span>
+              <Users className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 transition-transform duration-300 group-hover:rotate-12 flex-shrink-0" />
+              <span className="hidden sm:inline whitespace-nowrap">Switch Role</span>
             </Link>
           </Button>
         </div>
