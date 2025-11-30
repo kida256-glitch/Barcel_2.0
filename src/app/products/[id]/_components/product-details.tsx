@@ -60,6 +60,7 @@ export function ProductDetails({ product, seller }: ProductDetailsProps) {
             setFinalPrice={setFinalPrice}
             productId={product.id}
             sellerId={product.sellerId}
+            currentProductPrice={product.priceOptions[0] || 0}
           />
         </div>
       </div>

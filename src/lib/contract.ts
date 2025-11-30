@@ -209,16 +209,16 @@ export async function completePurchaseTransaction(purchaseId: string): Promise<s
 
   try {
     // Ensure purchaseId is in the correct format (0x...)
-    const purchaseId = purchaseIdOrTxHash.startsWith('0x') 
-      ? purchaseIdOrTxHash as `0x${string}`
-      : `0x${purchaseIdOrTxHash}` as `0x${string}`;
+    const formattedPurchaseId = purchaseId.startsWith('0x') 
+      ? purchaseId as `0x${string}`
+      : `0x${purchaseId}` as `0x${string}`;
 
     // Estimate gas
     const gas = await publicClient.estimateContractGas({
       address: CONTRACT_ADDRESS as Address,
       abi: BARCEL_MARKETPLACE_ABI,
       functionName: 'completePurchase',
-      args: [purchaseId],
+      args: [formattedPurchaseId],
       account,
     });
 
@@ -227,7 +227,7 @@ export async function completePurchaseTransaction(purchaseId: string): Promise<s
       address: CONTRACT_ADDRESS as Address,
       abi: BARCEL_MARKETPLACE_ABI,
       functionName: 'completePurchase',
-      args: [purchaseId],
+      args: [formattedPurchaseId],
       account,
       gas,
     });

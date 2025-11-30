@@ -6,22 +6,25 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Check, Loader2, Send, ShoppingCart, ArrowLeftRight, DollarSign } from 'lucide-react';
+import { Check, Loader2, Send, ShoppingCart, ArrowLeftRight, DollarSign, MessageSquare } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { createOffer, getOffersByBuyer, updateOfferStatus, getLatestOfferForProduct, createCounterOffer } from '@/lib/store';
 import { useWallet } from '@/hooks/use-wallet';
+import { NegotiationModal } from '@/modules/ai-negotiation/components/negotiation-modal';
+import { EscrowPaymentButton } from '@/modules/celo-escrow/components/escrow-payment-button';
 
 interface ActionButtonsProps {
   selectedPrice: number | null;
   customOffer: string;
-  bargainState: 'idle' | 'proposed' | 'approved' | 'sold';
+  bargainState: 'idle' | 'proposed' | 'approved' | 'sold' | 'counter-offered';
   setBargainState: (
-    state: 'idle' | 'proposed' | 'approved' | 'sold'
+    state: 'idle' | 'proposed' | 'approved' | 'sold' | 'counter-offered'
   ) => void;
   finalPrice: number | null;
   setFinalPrice: (price: number | null) => void;
   productId: string;
   sellerId: string;
+  currentProductPrice: number;
 }
 
 export function ActionButtons({
@@ -33,6 +36,7 @@ export function ActionButtons({
   setFinalPrice,
   productId,
   sellerId,
+  currentProductPrice,
 }: ActionButtonsProps) {
   const { toast } = useToast();
   const { wallet } = useWallet();
@@ -40,6 +44,7 @@ export function ActionButtons({
   const [counterOfferPrice, setCounterOfferPrice] = useState<string>('');
   const [counterDialogOpen, setCounterDialogOpen] = useState(false);
   const [currentOffer, setCurrentOffer] = useState<any>(null);
+  const [negotiationModalOpen, setNegotiationModalOpen] = useState(false);
   const offerPrice = customOffer ? parseFloat(customOffer) : null;
   const canPropose = selectedPrice !== null || (offerPrice && offerPrice > 0);
 
@@ -263,18 +268,34 @@ export function ActionButtons({
     );
   }
 
+  // Get current price for negotiation
+  const currentPrice = finalPrice || selectedPrice || offerPrice || currentProductPrice;
+
   return (
     <div className="space-y-4 animate-slide-in-3d">
       {bargainState === 'idle' && (
-        <Button
-          size="lg"
-          className="w-full text-lg bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/40 disabled:opacity-50 disabled:cursor-not-allowed"
-          disabled={!canPropose}
-          onClick={handlePropose}
-        >
-          <Send className="mr-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" /> 
-          Propose Price
-        </Button>
+        <>
+          <Button
+            size="lg"
+            className="w-full text-lg bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-primary/40 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!canPropose}
+            onClick={handlePropose}
+          >
+            <Send className="mr-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" /> 
+            Propose Price
+          </Button>
+          {wallet?.address && (
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full text-lg border-primary/30 hover:bg-primary/10 transition-all duration-300 hover:scale-105"
+              onClick={() => setNegotiationModalOpen(true)}
+            >
+              <MessageSquare className="mr-2 h-5 w-5" />
+              Negotiate with AI
+            </Button>
+          )}
+        </>
       )}
 
       {bargainState === 'proposed' && (
@@ -379,19 +400,41 @@ export function ActionButtons({
       </Dialog>
 
       {bargainState === 'approved' && (
-        <Button 
-          size="lg" 
-          className="w-full text-lg bg-gradient-to-r from-green-500 to-green-400 hover:from-green-600 hover:to-green-500 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-green-500/40 animate-pulse-3d" 
-          onClick={handleBuy} 
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-          ) : (
-            <ShoppingCart className="mr-2 h-5 w-5 transition-transform duration-300 group-hover:scale-125" />
+        <div className="space-y-3">
+          <Button 
+            size="lg" 
+            className="w-full text-lg bg-gradient-to-r from-green-500 to-green-400 hover:from-green-600 hover:to-green-500 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-green-500/40 animate-pulse-3d" 
+            onClick={handleBuy} 
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            ) : (
+              <ShoppingCart className="mr-2 h-5 w-5 transition-transform duration-300 group-hover:scale-125" />
+            )}
+            Buy Now for ${finalPrice ?? 0}
+          </Button>
+          {wallet?.address && finalPrice && (
+            <EscrowPaymentButton
+              productId={productId}
+              sellerId={sellerId}
+              amount={finalPrice}
+              offerId={currentOffer?.id}
+            />
           )}
-          Buy Now for ${finalPrice ?? 0}
-        </Button>
+        </div>
+      )}
+
+      {/* AI Negotiation Modal */}
+      {wallet?.address && (
+        <NegotiationModal
+          open={negotiationModalOpen}
+          onOpenChange={setNegotiationModalOpen}
+          productId={productId}
+          sellerId={sellerId}
+          currentPrice={currentPrice}
+          buyerAddress={wallet.address}
+        />
       )}
     </div>
   );

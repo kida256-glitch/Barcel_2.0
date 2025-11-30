@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
+import { AssistantButton } from '@/modules/ai-assistant/components/assistant-button';
 
 export const metadata: Metadata = {
   title: {
@@ -103,6 +104,7 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
           <Toaster />
+          <AssistantButton />
         </ThemeProvider>
       </body>
     </html>
