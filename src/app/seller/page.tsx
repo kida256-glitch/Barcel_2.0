@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { getProductsBySeller, getOffersBySeller, deleteProduct, getSoldProductsBySeller, getProductSalesCount, getNewOffersCount, getSellerOverallRating, getSellerLoyaltyPoints, getSellerLoyaltyTier, getAllReviewsBySeller } from '@/lib/store';
 import { hasCompletedOnboarding } from '@/lib/onboarding';
 import { useWallet } from '@/hooks/use-wallet';
-import { PlusCircle, List, Tag, Edit, Trash2, Bell, ShoppingBag, TrendingUp, Star, Award, MessageSquare, Store, Sparkles, Package } from 'lucide-react';
+import { PlusCircle, List, Tag, Edit, Trash2, Bell, ShoppingBag, TrendingUp, Star, Award, MessageSquare, Store, Sparkles, Package, Bot } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -15,11 +15,13 @@ import type { Product } from '@/lib/types';
 import type { Review } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { useAssistant } from '@/modules/ai-assistant/context';
 
 export default function SellerDashboard() {
   const { wallet } = useWallet();
   const router = useRouter();
   const { toast } = useToast();
+  const { openAssistant } = useAssistant();
   const [sellerProducts, setSellerProducts] = useState<(Product & { reviews: Review[] })[]>([]);
   const [pendingOffersCount, setPendingOffersCount] = useState(0);
   const [soldProducts, setSoldProducts] = useState<Array<{ productId: string; productName: string; salesCount: number; lastSaleDate: string }>>([]);
@@ -190,6 +192,25 @@ export default function SellerDashboard() {
             </div>
           </div>
         </div>
+
+        <Card className="mb-8 border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5">
+          <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="p-3 rounded-full bg-accent/10 text-accent flex-shrink-0">
+                <Bot className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <CardTitle>AI Assistant for Sellers</CardTitle>
+                <CardDescription>
+                  Need help listing products, navigating escrow, or negotiating with buyers? Launch the Barcel AI assistant for step-by-step guidance.
+                </CardDescription>
+              </div>
+            </div>
+            <Button onClick={openAssistant} className="mt-4 sm:mt-0 whitespace-nowrap">
+              Ask AI Now
+            </Button>
+          </CardHeader>
+        </Card>
 
         {/* Seller Guide Section */}
         <Card className="mb-8 border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 backdrop-blur-sm animate-slide-in-3d">

@@ -7,17 +7,20 @@ import { hasCompletedOnboarding } from '@/lib/onboarding';
 import { useWallet } from '@/hooks/use-wallet';
 import { WalletConnect } from '@/components/wallet-connect';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { Product } from '@/lib/types';
 import type { Review } from '@/lib/types';
-import { Wallet, ShoppingCart } from 'lucide-react';
+import { Wallet, ShoppingCart, Bot } from 'lucide-react';
+import { useAssistant } from '@/modules/ai-assistant/context';
 
 export default function BuyerHomePage() {
   const [products, setProducts] = useState<(Product & { reviews: Review[] })[]>([]);
   const router = useRouter();
   const { isConnected, wallet } = useWallet();
+  const { openAssistant } = useAssistant();
 
   useEffect(() => {
     // Check if user has completed onboarding
@@ -31,23 +34,38 @@ export default function BuyerHomePage() {
       return;
     }
 
-    // Load products from store
-    setProducts(getAllProducts());
-    
-    // Listen for storage changes (when new products are added)
-    const handleStorageChange = () => {
+    // Load products function
+    const loadProducts = () => {
       setProducts(getAllProducts());
     };
     
+    // Initial load
+    loadProducts();
+    
+    // Listen for custom event (same tab updates)
+    const handleProductsUpdated = () => {
+      loadProducts();
+    };
+    
+    // Listen for storage changes (when new products are added in other tabs)
+    const handleStorageChange = (e: StorageEvent) => {
+      // Only reload if products storage changed
+      if (e.key === 'celobargain_products') {
+        loadProducts();
+      }
+    };
+    
+    window.addEventListener('productsUpdated', handleProductsUpdated);
     window.addEventListener('storage', handleStorageChange);
-    // Also check periodically for changes (since same-tab updates don't trigger storage event)
-    const interval = setInterval(handleStorageChange, 1000);
+    // Also check periodically for changes (backup mechanism)
+    const interval = setInterval(loadProducts, 2000);
     
     return () => {
+      window.removeEventListener('productsUpdated', handleProductsUpdated);
       window.removeEventListener('storage', handleStorageChange);
       clearInterval(interval);
     };
-  }, [router]);
+  }, [router, isConnected, wallet?.address]);
 
   // Show wallet connection prompt if not connected
   if (!isConnected || !wallet?.address) {
@@ -161,6 +179,24 @@ export default function BuyerHomePage() {
               </div>
             </div>
           </CardContent>
+        </Card>
+
+        {/* AI Assistant CTA */}
+        <Card className="mb-8 border-accent/30 bg-background/80 backdrop-blur animate-slide-in-3d">
+          <CardHeader className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-3 rounded-full bg-primary/10 text-primary">
+                <Bot className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-lg sm:text-xl">Need Help?</CardTitle>
+                <CardDescription>Chat with the Barcel AI assistant for navigation tips, product suggestions, or bargaining help.</CardDescription>
+              </div>
+            </div>
+            <Button onClick={openAssistant} className="mt-4 sm:mt-0 whitespace-nowrap">
+              Launch AI Assistant
+            </Button>
+          </CardHeader>
         </Card>
         {products.length === 0 ? (
           <div className="text-center py-12 sm:py-16 md:py-20 animate-slide-in-3d px-4">

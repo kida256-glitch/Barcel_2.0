@@ -116,6 +116,29 @@ function saveOffers() {
 
 // Product functions
 export function getAllProducts(): (Product & { reviews: Review[] })[] {
+  // Re-initialize from localStorage to get latest products (especially from other tabs)
+  if (typeof window !== 'undefined') {
+    try {
+      const storedProducts = localStorage.getItem('celobargain_products');
+      if (storedProducts) {
+        const parsed = JSON.parse(storedProducts);
+        // Filter out old dummy products
+        const filtered = parsed.filter((product: any) => {
+          if (!product.id || typeof product.id !== 'string') return false;
+          const idParts = product.id.split('-');
+          if (idParts.length < 3) return false;
+          const secondPart = idParts[1];
+          return secondPart.length >= 10 && !isNaN(Number(secondPart));
+        });
+        // Update in-memory store if it's different
+        if (JSON.stringify(filtered) !== JSON.stringify(productsStore)) {
+          productsStore = filtered;
+        }
+      }
+    } catch (error) {
+      console.error('Error loading products in getAllProducts:', error);
+    }
+  }
   return productsStore;
 }
 
@@ -131,6 +154,12 @@ export function addProduct(product: Omit<Product, 'id'> & { reviews?: Review[] }
   };
   productsStore.push(newProduct);
   saveProducts();
+  
+  // Dispatch custom event to notify other components (same tab)
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('productsUpdated', { detail: { product: newProduct } }));
+  }
+  
   return newProduct;
 }
 
@@ -149,6 +178,12 @@ export function updateProduct(productId: string, updates: Partial<Product>): (Pr
     ...updates,
   };
   saveProducts();
+  
+  // Dispatch custom event to notify other components
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('productsUpdated'));
+  }
+  
   return productsStore[productIndex];
 }
 
@@ -160,6 +195,12 @@ export function deleteProduct(productId: string): boolean {
 
   productsStore.splice(productIndex, 1);
   saveProducts();
+  
+  // Dispatch custom event to notify other components
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('productsUpdated'));
+  }
+  
   return true;
 }
 

@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/theme-provider';
 import { AssistantButton } from '@/modules/ai-assistant/components/assistant-button';
+import { AssistantProvider } from '@/modules/ai-assistant/context';
 
 export const metadata: Metadata = {
   title: {
@@ -102,9 +103,11 @@ export default function RootLayout({
       </head>
       <body className={cn('font-body antialiased min-h-screen bg-background')}>
         <ThemeProvider>
-          {children}
-          <Toaster />
-          <AssistantButton />
+          <AssistantProvider>
+            {children}
+            <Toaster />
+            <AssistantButton />
+          </AssistantProvider>
         </ThemeProvider>
       </body>
     </html>
