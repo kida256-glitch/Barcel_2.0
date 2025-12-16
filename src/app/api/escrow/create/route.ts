@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createPublicClient, http, parseEther } from 'viem';
-import { celoAlfajores } from 'viem/chains';
+import { celo } from 'viem/chains';
 
 const ESCROW_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS;
 

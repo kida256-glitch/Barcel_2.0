@@ -1,6 +1,6 @@
-import hre from 'hardhat';
+const hre = require("hardhat");
 
-export default async function main() {
+async function main() {
   console.log("Deploying BarcelMarketplace contract...");
 
   const BarcelMarketplace = await hre.ethers.getContractFactory("BarcelMarketplace");
@@ -14,11 +14,9 @@ export default async function main() {
   console.log(`NEXT_PUBLIC_CONTRACT_ADDRESS=${address}`);
 }
 
-// Allow running via `node` or Hardhat
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch((err) => {
-    console.error(err);
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error(error);
     process.exit(1);
   });
-}
-

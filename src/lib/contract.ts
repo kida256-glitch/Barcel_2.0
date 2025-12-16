@@ -1,8 +1,8 @@
 'use client';
 
 import { createPublicClient, createWalletClient, custom, http, parseEther, formatEther, type Address } from 'viem';
-import { celoAlfajores } from 'viem/chains';
-import { CELO_TESTNET_CHAIN_ID } from './wallet';
+import { celo } from 'viem/chains';
+import { CELO_CHAIN_ID } from './wallet';
 
 // Contract ABI (Application Binary Interface)
 export const BARCEL_MARKETPLACE_ABI = [
@@ -94,7 +94,7 @@ export function getWalletClient() {
   if (!ethereum) return null;
 
   return createWalletClient({
-    chain: celoAlfajores,
+    chain: celo,
     transport: custom(ethereum),
   });
 }
@@ -104,8 +104,8 @@ export function getWalletClient() {
  */
 export function getPublicClient() {
   return createPublicClient({
-    chain: celoAlfajores,
-    transport: http('https://alfajores-forno.celo-testnet.org'),
+    chain: celo,
+    transport: http('https://forno.celo.org'),
   });
 }
 
@@ -135,6 +135,19 @@ export async function createPurchaseTransaction(
 
   // Convert CELO amount to wei
   const amountInWei = parseEther(amountInCELO.toString());
+
+  // Early balance check (amount + small gas buffer) to avoid wallet rejections
+  const balance = await publicClient.getBalance({ address: account });
+  const gasBufferWei = parseEther('0.02'); // ~0.02 CELO buffer for gas
+  const minRequired = amountInWei + gasBufferWei;
+  if (balance < minRequired) {
+    const shortfall = minRequired - balance;
+    throw new Error(
+      `Insufficient CELO. Need at least ${formatEther(minRequired)} CELO (amount + gas buffer). ` +
+      `Your balance: ${formatEther(balance)} CELO. Shortfall: ${formatEther(shortfall)} CELO. ` +
+      `Try lowering the offer amount or add more CELO to your wallet.`
+    );
+  }
 
   // Check if contract address is set
   if (!contractAddress || CONTRACT_ADDRESS === '0x0000000000000000000000000000000000000000') {

@@ -190,10 +190,10 @@ export async function connectGenericWallet(provider: any): Promise<WalletInfo | 
     // Check if we need to switch to Celo network
     if (chainIdNumber !== CELO_CHAIN_ID && chainIdNumber !== CELO_TESTNET_CHAIN_ID) {
       try {
-        // Try to switch to Celo Alfajores (testnet)
+        // Try to switch to Celo Mainnet
         await provider.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: `0x${CELO_TESTNET_CHAIN_ID.toString(16)}` }],
+          params: [{ chainId: `0x${CELO_CHAIN_ID.toString(16)}` }],
         });
       } catch (switchError: any) {
         // If the chain doesn't exist, add it
@@ -202,15 +202,15 @@ export async function connectGenericWallet(provider: any): Promise<WalletInfo | 
             method: 'wallet_addEthereumChain',
             params: [
               {
-                chainId: `0x${CELO_TESTNET_CHAIN_ID.toString(16)}`,
-                chainName: 'Celo Alfajores',
+                chainId: `0x${CELO_CHAIN_ID.toString(16)}`,
+                chainName: 'Celo Mainnet',
                 nativeCurrency: {
                   name: 'CELO',
                   symbol: 'CELO',
                   decimals: 18,
                 },
-                rpcUrls: ['https://alfajores-forno.celo-testnet.org'],
-                blockExplorerUrls: ['https://alfajores.celoscan.io'],
+                rpcUrls: ['https://forno.celo.org'],
+                blockExplorerUrls: ['https://celoscan.io'],
               },
             ],
           });
@@ -343,7 +343,7 @@ export function getStoredWallet(): WalletInfo | null {
 
   return {
     address,
-    chainId: CELO_TESTNET_CHAIN_ID,
+    chainId: CELO_CHAIN_ID,
     walletType,
   };
 }

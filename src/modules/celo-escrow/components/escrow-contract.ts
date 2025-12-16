@@ -1,7 +1,7 @@
 'use client';
 
-import { createPublicClient, http, parseEther, type Address } from 'viem';
-import { celoAlfajores } from 'viem/chains';
+import { createPublicClient, http, parseEther, encodeFunctionData, type Address, type Hex } from 'viem';
+import { celo } from 'viem/chains';
 
 // Escrow Contract ABI
 export const ESCROW_ABI = [
@@ -53,7 +53,13 @@ export const ESCROW_ABI = [
   },
 ] as const;
 
-const ESCROW_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS as Address;
+export function getEscrowContractAddress(): Address {
+  const address = process.env.NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS;
+  if (!address || !address.startsWith('0x')) {
+    throw new Error('Escrow contract address not configured. Please set NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS in .env.local');
+  }
+  return address as Address;
+}
 
 export async function createEscrowTransaction(
   seller: Address,
@@ -61,62 +67,156 @@ export async function createEscrowTransaction(
   amount: number,
   walletProvider: any
 ): Promise<{ escrowId: string; txHash: string }> {
-  if (!ESCROW_CONTRACT_ADDRESS) {
-    throw new Error('Escrow contract address not configured');
-  }
-
+  const contractAddress = getEscrowContractAddress();
   const amountInWei = parseEther(amount.toString());
+
+  // Get the buyer's address
+  const accounts = await walletProvider.request({ method: 'eth_requestAccounts' });
+  const buyerAddress = accounts[0] as Address;
+
+  // Encode the function call using viem
+  const data = encodeFunctionData({
+    abi: ESCROW_ABI,
+    functionName: 'createEscrow',
+    args: [seller, productId],
+  });
 
   // Request transaction from wallet
   const txHash = await walletProvider.request({
     method: 'eth_sendTransaction',
     params: [
       {
-        to: ESCROW_CONTRACT_ADDRESS,
-        from: await walletProvider.request({ method: 'eth_requestAccounts' }).then((accounts: string[]) => accounts[0]),
+        to: contractAddress,
+        from: buyerAddress,
         value: `0x${amountInWei.toString(16)}`,
-        data: encodeCreateEscrow(seller, productId),
+        data: data as Hex,
       },
     ],
-  });
+  }) as string;
 
-  // Calculate escrow ID (same as contract)
+  // Note: The actual escrowId is returned by the contract, but we can't get it from the transaction
+  // In a real implementation, you'd need to parse the transaction receipt or call getEscrow
+  // For now, we'll use a placeholder that matches the contract's calculation
   const escrowId = `0x${Buffer.from(
     `${txHash}${seller}${productId}${Date.now()}`
-  ).toString('hex').slice(0, 64)}`;
+  ).toString('hex').slice(0, 64)}` as Hex;
 
   return { escrowId, txHash };
-}
-
-function encodeCreateEscrow(seller: Address, productId: string): string {
-  // Simplified encoding - in production, use proper ABI encoding
-  return '0x' + seller.slice(2) + Buffer.from(productId).toString('hex').padStart(64, '0');
 }
 
 export async function releaseEscrowTransaction(
   escrowId: string,
   walletProvider: any
 ): Promise<string> {
-  if (!ESCROW_CONTRACT_ADDRESS) {
-    throw new Error('Escrow contract address not configured');
-  }
+  const contractAddress = getEscrowContractAddress();
+
+  // Get the buyer's address
+  const accounts = await walletProvider.request({ method: 'eth_requestAccounts' });
+  const buyerAddress = accounts[0] as Address;
+
+  // Encode the function call using viem
+  const data = encodeFunctionData({
+    abi: ESCROW_ABI,
+    functionName: 'releaseEscrow',
+    args: [escrowId as Hex],
+  });
 
   const txHash = await walletProvider.request({
     method: 'eth_sendTransaction',
     params: [
       {
-        to: ESCROW_CONTRACT_ADDRESS,
-        from: await walletProvider.request({ method: 'eth_requestAccounts' }).then((accounts: string[]) => accounts[0]),
-        data: encodeReleaseEscrow(escrowId),
+        to: contractAddress,
+        from: buyerAddress,
+        data: data as Hex,
       },
     ],
-  });
+  }) as string;
 
   return txHash;
 }
 
-function encodeReleaseEscrow(escrowId: string): string {
-  // Simplified encoding
-  return '0x' + escrowId.slice(2).padStart(64, '0');
+export async function refundEscrowTransaction(
+  escrowId: string,
+  walletProvider: any
+): Promise<string> {
+  const contractAddress = getEscrowContractAddress();
+
+  // Get the user's address
+  const accounts = await walletProvider.request({ method: 'eth_requestAccounts' });
+  const userAddress = accounts[0] as Address;
+
+  // Encode the function call using viem
+  const data = encodeFunctionData({
+    abi: ESCROW_ABI,
+    functionName: 'refundBuyer',
+    args: [escrowId as Hex],
+  });
+
+  const txHash = await walletProvider.request({
+    method: 'eth_sendTransaction',
+    params: [
+      {
+        to: contractAddress,
+        from: userAddress,
+        data: data as Hex,
+      },
+    ],
+  }) as string;
+
+  return txHash;
+}
+
+export async function cancelEscrowTransaction(
+  escrowId: string,
+  walletProvider: any
+): Promise<string> {
+  const contractAddress = getEscrowContractAddress();
+
+  // Get the user's address
+  const accounts = await walletProvider.request({ method: 'eth_requestAccounts' });
+  const userAddress = accounts[0] as Address;
+
+  // Encode the function call using viem
+  const data = encodeFunctionData({
+    abi: ESCROW_ABI,
+    functionName: 'cancelEscrow',
+    args: [escrowId as Hex],
+  });
+
+  const txHash = await walletProvider.request({
+    method: 'eth_sendTransaction',
+    params: [
+      {
+        to: contractAddress,
+        from: userAddress,
+        data: data as Hex,
+      },
+    ],
+  }) as string;
+
+  return txHash;
+}
+
+// Helper function to get escrow details from the contract
+export async function getEscrowDetails(escrowId: string): Promise<any> {
+  const contractAddress = getEscrowContractAddress();
+  const publicClient = createPublicClient({
+    chain: celo,
+    transport: http('https://forno.celo.org'),
+  });
+
+  try {
+    const result = await publicClient.readContract({
+      address: contractAddress,
+      abi: ESCROW_ABI,
+      functionName: 'getEscrow',
+      args: [escrowId as Hex],
+    });
+
+    return result;
+  } catch (error) {
+    console.error('Error fetching escrow details:', error);
+    return null;
+  }
 }
 

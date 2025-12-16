@@ -7,9 +7,11 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { message, context, history } = body;
 
-    if (!process.env.GOOGLE_GENAI_API_KEY) {
+    const hasGoogle = !!process.env.GOOGLE_GENAI_API_KEY;
+    const hasAnthropic = !!process.env.ANTHROPIC_API_KEY || process.env.AI_PROVIDER === 'anthropic' || process.env.USE_CLAUDE === 'true';
+    if (!hasGoogle && !hasAnthropic) {
       return NextResponse.json(
-        { error: 'AI service not configured' },
+        { error: 'AI service not configured. Set GOOGLE_GENAI_API_KEY or ANTHROPIC_API_KEY (or AI_PROVIDER=anthropic / USE_CLAUDE=true).' },
         { status: 500 }
       );
     }
